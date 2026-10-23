@@ -46,5 +46,7 @@ class TestCalculo(unittest.TestCase):
         }
         self.assertEqual(
             cenarios,
-            {"simples": 76.51, "vip": 272.85, "limite_200": 223.55, "vazio": 13.54},
+            # limite_200 e vazio pelo contrato (AV2, ADR-002): R1.3 200 >= 200 -> frete 0, 200 × 1,05 = 210,00;
+            # R1.5 12,90 × 1,05 = 13,545 -> 13,55 (meio para cima). Antes gravavam 223.55 e 13.54 (bugs).
+            {"simples": 76.51, "vip": 272.85, "limite_200": 210.0, "vazio": 13.55},
         )

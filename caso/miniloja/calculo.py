@@ -1,25 +1,30 @@
 """Cálculo de totais de pedido."""
+from decimal import ROUND_HALF_UP, Decimal
+
 from miniloja import flags
 
-FRETE_POR_UF = {"PE": 12.9, "SP": 19.9, "RJ": 21.5}
-TAXA_POR_UF = {"PE": 0.05, "SP": 0.07, "RJ": 0.06}
-FRETE_PADRAO = 29.9
-TAXA_PADRAO = 0.08
+# Decimal evita o erro de representação do float: R1.5 exige meio para cima exato.
+FRETE_POR_UF = {"PE": Decimal("12.90"), "SP": Decimal("19.90"), "RJ": Decimal("21.50")}
+TAXA_POR_UF = {"PE": Decimal("0.05"), "SP": Decimal("0.07"), "RJ": Decimal("0.06")}
+FRETE_PADRAO = Decimal("29.90")
+TAXA_PADRAO = Decimal("0.08")
+LIMITE_FRETE_GRATIS = Decimal("200")
+CENTAVO = Decimal("0.01")
 
 
 def calcular_total(itens, cupom=None, uf="PE"):
     """Calcula o total do pedido."""
     # soma dos itens
-    total = sum(i["preco"] * i["qtd"] for i in itens)
+    total = sum((Decimal(str(i["preco"])) * i["qtd"] for i in itens), Decimal(0))
 
     # desconto
     desconto_aplicado = False
     if cupom is not None:
         if cupom == "PROMO10":
-            total = total * 0.9
+            total = total * Decimal("0.9")
             desconto_aplicado = True
         elif cupom == "VIP15":
-            total = total * 0.85
+            total = total * Decimal("0.85")
             desconto_aplicado = True
         elif cupom == "FRETEGRATIS":
             # tratado mais abaixo
@@ -27,7 +32,7 @@ def calcular_total(itens, cupom=None, uf="PE"):
         elif cupom == "NATAL":
             # campanha antiga; só vale se a flag estiver ligada
             if flags.promo_natal_ativa():
-                total = total * 0.8
+                total = total * Decimal("0.8")
                 desconto_aplicado = True
             else:
                 desconto_aplicado = False
@@ -36,8 +41,8 @@ def calcular_total(itens, cupom=None, uf="PE"):
             desconto_aplicado = False
 
     # frete
-    if cupom == "FRETEGRATIS" or total > 200:
-        frete = 0
+    if cupom == "FRETEGRATIS" or total >= LIMITE_FRETE_GRATIS:
+        frete = Decimal(0)
     else:
         frete = FRETE_POR_UF.get(uf, FRETE_PADRAO)
     total = total + frete
@@ -50,4 +55,4 @@ def calcular_total(itens, cupom=None, uf="PE"):
     if desconto_aplicado:
         pass  # reservado para relatório de descontos (não implementado)
 
-    return round(total, 2)
+    return float(total.quantize(CENTAVO, rounding=ROUND_HALF_UP))
