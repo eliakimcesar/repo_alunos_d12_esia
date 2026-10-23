@@ -4,7 +4,8 @@ Uso, a partir da raiz do pacote:
   python -B av2/golden_master.py gravar [--codigo caso]    # antes da refatoração
   python -B av2/golden_master.py comparar [--codigo caso]  # depois; código de saída 1 se houver diferença
 
-Preserva o comportamento ATUAL, inclusive divergências do contrato (R1.3 "> 200", R1.5 round de float).
+Preserva o comportamento ATUAL, sem julgar se está certo. A gravação de a90afab congelou as divergências
+do contrato (R1.3 "> 200", R1.5 round de float); a de 6cb1388, posterior à correção (ADR-002), não as tem.
 """
 import argparse
 import itertools
