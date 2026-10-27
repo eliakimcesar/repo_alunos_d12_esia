@@ -19,5 +19,10 @@ class Estoque:
         self.reservas[(pedido_id, sku)] = qtd
         return True
 
+    def liberar(self, sku, qtd, pedido_id):
+        """Devolve ao estoque a quantidade reservada do SKU."""
+        self.saldos[sku] = self.saldos.get(sku, 0) + qtd
+        self.reservas.pop((pedido_id, sku), None)
+
     def saldo(self, sku):
         return self.saldos.get(sku, 0)
