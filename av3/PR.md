@@ -35,8 +35,21 @@ python -B testes/test_miniloja.py --codigo caso
 git diff --stat main -- caso/
 # 3 arquivos: estoque.py (+5), pedidos.py (+11/-2), test_pedidos.py (+45/-1)
 ```
-Código de `main` com os três testes: `FAILED (failures=3)` (`3 != 5`, `46 != 48`, `3 != 5`).
-Sabotagens (cópia fora do repositório): `liberar(...)` → `pass` faz os três falharem; `break` após o primeiro `liberar` → `AssertionError: 1 != 4` no teste de várias reservas.
+Código de `main` com os três testes (esperado `failures=3`: `3 != 5`, `46 != 48`, `3 != 5`):
+```
+git checkout main
+git checkout av3-b3-reserva -- caso/testes_existentes/test_pedidos.py
+python -B testes/test_miniloja.py --codigo caso --existentes
+git restore --source=HEAD --staged --worktree caso/testes_existentes/test_pedidos.py
+git checkout av3-b3-reserva
+```
+Sabotagens, uma por vez em `av3-b3-reserva` (desfazer com `git restore caso/miniloja/`):
+```
+S1 corpo de liberar() -> pass                                   failures=3
+S2 break após o 1º liberar() em criar()                         failures=1 (1 != 4)
+S3 sed -i '/self.reservas.pop/d' caso/miniloja/estoque.py       failures=3 (reservas != {})
+S4 sed -i '/^            raise$/d' caso/miniloja/pedidos.py     failures=4 (not raised; 201 != 409)
+```
 Mutação (`MINILOJA_TEST_CMD="python -B testes/test_miniloja.py --existentes --codigo caso -x"`): `Mutantes: 31 | mortos: 23 | sobreviventes: 8 | escore: 74%`, igual ao anterior; nenhuma das 31 mutações atinge o rollback, então a prova dos testes é a sabotagem.
 
 ## Testes que falhariam sem a mudança
@@ -49,12 +62,13 @@ Mutação (`MINILOJA_TEST_CMD="python -B testes/test_miniloja.py --existentes --
 Nenhuma (somente biblioteca padrão).
 
 ## Modo de interação
-Agente no editor (Claude Code, Claude Opus 5.5) com plano revisado por mim antes de executar. Motivo: raio de impacto pequeno e reversível (dois arquivos de código, branch própria), oráculo claro (R2.2 + teste vermelho antes da correção) e código já conhecido da AV1.3. Alternativas comparadas: chat + edição manual (na T1 da AV1.1, mesma tarefa: chat 9'45" × agente 3'55" até verificado) e agente sem plano revisado (descartado pelo raio de impacto; foi a revisão do plano que corrigiu o `liberar`). As alternativas não foram executadas nesta AV3.
+Agente no editor (Claude Code, Claude Opus 5.5) com plano revisado por mim antes de executar. Motivo: raio de impacto pequeno e reversível (dois arquivos de código, branch própria), oráculo claro (R2.2 + teste vermelho antes da correção) e código já conhecido da AV1.3. Alternativas comparadas: chat + edição manual (na T1 da AV1.1, mesma tarefa: chat 9'45" × agente 3'55" até verificado, uma execução por modo e quem veio depois já conhecia o problema) e agente sem plano revisado (descartado pelo raio de impacto; foi a revisão do plano que corrigiu o `liberar`). As alternativas não foram executadas nesta AV3.
 
 ## Limites
 - `pedido_id = f"tmp-{usuario_id}"` é o mesmo para todos os pedidos de um usuário: o `liberar` remove a entrada `(tmp-N, sku)` de `reservas` mesmo que ela venha de um pedido anterior aprovado (o saldo fica correto). Corrigir exige `pedido_id` único, fora do escopo.
 - SKU repetido no mesmo pedido: o saldo volta certo, mas `reservas` continua sobrescrevendo a entrada (comportamento anterior).
 - Pagamento recusado (R2.3) ainda deixa reservas; o contrato só exige "não salva".
+- Exceção diferente de `EstoqueInsuficiente` durante as reservas não dispara o rollback.
 - O teste do handler usa o estoque global do módulo (usuário 9001 para não colidir com outros testes).
 - A branch parte de `main`; as correções de R1.3/R1.5 estão no PR da AV2 (`av2-refatoracao`).
 
