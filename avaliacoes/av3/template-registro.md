@@ -1,6 +1,6 @@
 # Registro individual — AV3
 
-**Limite: três páginas + até duas de evidências.** Estudante: Eliakim — Data: 27/10/2026 — Caminho: B (MiniLoja: B3)
+**Limite: três páginas + até duas de evidências.** Estudante: Eliakim Cordeiro — Data: 27/10/2026 — Caminho: B (MiniLoja: B3)
 
 **Modo de interação usado e por quê (raio de impacto, oráculo, familiaridade):** agente no editor (Claude Code) com plano revisado por mim antes de executar. Raio de impacto pequeno e reversível: dois arquivos de código em branch própria do meu fork (`av3-b3-reserva`). Oráculo claro: R2.2 ("nenhuma reserva pode permanecer") e um teste escrito e visto vermelho antes da correção. Familiaridade: já tinha lido `estoque.py` na AV1.3 (mutante `<` → `<=`). **Alternativa comparada:** chat + edição manual. Descartei porque o agente roda suíte, sabotagem e mutação no próprio repositório e a revisão do plano mantém a decisão comigo; com o chat eu copiaria código sem execução no mesmo passo.
 
