@@ -3,8 +3,8 @@
 ## Intenção
 R2.2: "Se algum item não tiver estoque, o pedido é recusado (`409`) e **nenhuma reserva pode permanecer**." Hoje `PedidoService.criar` reserva item por item; quando o segundo item falha, a reserva do primeiro fica (saldo baixado e entrada em `estoque.reservas`).
 
-## Escopo (declarado antes da mudança)
-Escrito e aprovado na sessão com o agente antes do primeiro commit (`e039c68`); versionado só depois da correção, neste arquivo (`7dd40c5`). O trecho da sessão está nas evidências do registro.
+## Escopo (seis campos)
+Aprovado na sessão com o agente às 18:07:53, antes do primeiro commit (`e039c68`, 18:08:40); versionado só depois da correção, neste arquivo (`7dd40c5`). Linha do tempo em [`av3/sessao-trecho.md`](sessao-trecho.md).
 
 - **Objetivo:** item sem estoque → pedido recusado sem nenhuma reserva remanescente.
 - **Pode tocar:** `caso/miniloja/pedidos.py`, `caso/miniloja/estoque.py` (novo `liberar`), `caso/testes_existentes/test_pedidos.py`.
@@ -50,13 +50,13 @@ S2 break após o 1º liberar() em criar()                         failures=1 (1 
 S3 sed -i '/self.reservas.pop/d' caso/miniloja/estoque.py       failures=3 (reservas != {})
 S4 sed -i '/^            raise$/d' caso/miniloja/pedidos.py     failures=4 (not raised; 201 != 409)
 ```
-Mutação (`MINILOJA_TEST_CMD="python -B testes/test_miniloja.py --existentes --codigo caso -x"`): `Mutantes: 31 | mortos: 23 | sobreviventes: 8 | escore: 74%`, igual ao anterior; nenhuma das 31 mutações atinge o rollback, então a prova dos testes é a sabotagem.
+Mutação (`MINILOJA_TEST_CMD="python -B testes/test_miniloja.py --existentes --codigo caso -x" python -B testes/mutacao_manual.py`): `Mutantes: 31 | mortos: 23 | sobreviventes: 8 | escore: 74%`, igual ao anterior; nenhuma das 31 mutações atinge o rollback, então a prova dos testes é a sabotagem.
 
 ## Testes que falhariam sem a mudança
 *Reserva* = saldo baixado **e** entrada `(pedido_id, sku)` em `estoque.reservas`; "nenhuma reserva permanece" exige desfazer os dois. Em `caso/testes_existentes/test_pedidos.py`:
 - `test_item_sem_estoque_nao_deixa_reserva`: BOLA-01×2 + CHUTEIRA-42 sem saldo → `EstoqueInsuficiente` (R2.2 recusa); saldo 5 e `reservas` vazio (R2.2); sem cobrança e sem pedido salvo (**derivado**, não escrito no contrato).
 - `test_falha_no_ultimo_item_desfaz_todas_as_reservas`: BOLA×2, CAMISA×3, CHUTEIRA sem saldo → os dois saldos voltam (R2.2 com várias reservas; pega o rollback parcial).
-- `test_handler_responde_409_sem_deixar_reserva`: via `handlers.post_pedidos` → `409` com o `sku` e saldo intacto (R2.2 na camada HTTP; verifica o invariante "409 continua").
+- `test_handler_responde_409_sem_deixar_reserva`: via `handlers.post_pedidos` → `409` com o `sku` e saldo intacto (R2.2 na camada HTTP; acrescenta a checagem de reserva ao 409, que já era coberto por `test_handlers.test_estoque_insuficiente_retorna_409`).
 
 ## Dependências novas
 Nenhuma (somente biblioteca padrão).

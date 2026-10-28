@@ -6,12 +6,13 @@
 
 **Escopo declarado antes (seis campos):** objetivo: item sem estoque → recusa sem reserva remanescente (R2.2); pode tocar: `pedidos.py`, `estoque.py` (novo `liberar`), `test_pedidos.py`; não pode tocar: `testes/`, `regras.md`, `calculo.py`, cadastro, `handlers.py`, assinaturas, pagamento recusado; invariantes: totais e 409 iguais, suíte verde, verificações 8/3, só biblioteca padrão; pronto quando: teste vermelho no original e verde na correção, sabotagem detectada, diff em `caso/` só nos 3 arquivos; pare e pergunte se: mudar assinatura, handler ou pagamento, ou o contrato não responder. Aprovado por mim na sessão às 18:07:53, antes do 1º commit (`e039c68`, 18:08:40), mas versionado só depois da correção (`7dd40c5`); a prova do "antes" é a sessão (Evidências). **Cumprido? Como verifiquei (comando ou barreira):** sim; `git diff --stat main -- caso/` → só os 3 arquivos (+61/−3); suíte `Ran 29 … OK`; verificações `FAILED (failures=3)`, as mesmas v08–v10.
 
-**Verificação:** *reserva* = saldo baixado **e** entrada `(pedido_id, sku)` em `reservas`; R2.2 exige desfazer os dois. Testes que falhariam sem a mudança (`test_pedidos.py`): `test_item_sem_estoque_nao_deixa_reserva` (exceção → recusa; saldo e `reservas` → R2.2; sem cobrança/pedido salvo → **derivado**, fora do contrato); `test_falha_no_ultimo_item_desfaz_todas_as_reservas` (várias reservas → R2.2); `test_handler_responde_409_sem_deixar_reserva` (`409` → R2.2 na camada HTTP). Prova (comandos e saídas em Evidências): `main` + testes → 3 falhas; corrigido → `OK`; sabotagens `pass` (3 falhas), `break` após o 1º `liberar` (`1 != 4`), sem `pop` (3 falhas) e sem `raise` (4 falhas). Mutação 74%, igual à AV1.3: nenhuma das 31 mutações atinge o rollback.
+**Verificação:** *reserva* = saldo baixado **e** entrada `(pedido_id, sku)` em `reservas`; R2.2 exige desfazer os dois. Testes que falhariam sem a mudança (`test_pedidos.py`): `test_item_sem_estoque_nao_deixa_reserva` (exceção → recusa; saldo e `reservas` → R2.2; sem cobrança/pedido salvo → **derivado**, fora do contrato); `test_falha_no_ultimo_item_desfaz_todas_as_reservas` (várias reservas → R2.2); `test_handler_responde_409_sem_deixar_reserva` (`409` + sem reserva → R2.2 em HTTP). Prova (comandos e saídas em Evidências): `main` + testes → 3 falhas; corrigido → `OK`; sabotagens `pass` (3 falhas), `break` após o 1º `liberar` (`1 != 4`), sem `pop` (3 falhas) e sem `raise` (4 falhas). Mutação 74%, igual à AV1.3: nenhuma das 31 mutações atinge o rollback.
 
 | O que a IA errou (o quê, onde) | Como detectei | O que corrigi e por quê (causa e impacto) |
 | --- | --- | --- |
 | 1º teste (`e039c68`) com uma só reserva antes da falha | Revisão (Sonnet 5.5); sabotagem `break` → suíte `OK` | Teste de três itens (`ea70c8a`): um item não distingue liberar tudo de liberar só a primeira; rollback parcial passaria verde |
-| Invariante "409 continua" sem teste | Revisão (Sonnet 5.5): testes só do serviço | Teste via `post_pedidos` (`ea70c8a`): mudança no handler quebraria o 409 sem aviso |
+| Opus, ao avaliar a revisão, afirmou que nada verificava o "409 continua" | S4: o teste antigo `test_handlers` falha (`201 != 409`) | O 409 já tinha teste, mas sem checar reservas; `post_pedidos` (`ea70c8a`) acrescenta 409 + sem reserva |
+| Aplicou "SKU repetido fica como limite" antes da minha resposta | Horários da sessão: resposta 18:21:53, depois do `8cc20d6` (18:18:11) | Confirmei a decisão depois; registro a ordem real no anexo da sessão |
 | Plano de commits deixou o escopo por último (`7dd40c5`) | Revisão (Sonnet 5.5) + horários do `git log` | Declarei a data real e anexei o trecho da sessão: o "antes" não era verificável pelo repositório |
 | `liberar(sku, pedido_id)` lendo a quantidade de `reservas` | Revisão do plano: `reservar` sobrescreve a chave | `liberar(sku, qtd, pedido_id)` com lista local: com SKU repetido o saldo voltaria errado |
 | "Sabotagem ou mutação" tratadas como provas equivalentes | Escore 74% idêntico antes e depois | Prova pela sabotagem; as mutações são fixas e não testam a mudança |
@@ -36,7 +37,7 @@
 
 ## Evidências
 
-**Escopo antes do código (sessão Claude Code `b2c4e7ce-c87d-43d5-aa01-9374099f9e69`, 27/10/2026):** o agente apresentou os seis campos; às 18:07:53 respondi "Escopo: OK; Modo: Agente no editor (Claude Code) com plano revisado por mim". Plano revisado: "Siga a 1 com o recomendado" (1ª pergunta do plano, sobre `pedido_id`; decisão: não tratar e registrar como limite) e "SKU duplicado no pedido não mexer e registrar como limite".
+**Escopo antes do código (sessão Claude Code `b2c4e7ce-c87d-43d5-aa01-9374099f9e69`, 27/10/2026; horários convertidos de UTC para −0300, o fuso do `git log`; linha do tempo completa em `av3/sessao-trecho.md`):** o agente apresentou os seis campos às 17:53:31; às 18:07:53 respondi "Escopo: OK; Modo: Agente no editor (Claude Code) com plano revisado por mim". Plano revisado: "Siga a 1 com o recomendado" às 18:17:21, antes da correção (1ª pergunta do plano, sobre `pedido_id`; decisão: não tratar e registrar como limite), e "SKU duplicado no pedido não mexer e registrar como limite" às 18:21:53, depois da correção.
 
 ```
 e039c68  18:08  teste de regressão (vermelho)
@@ -75,4 +76,8 @@ S4 sem raise: sed -i '/^            raise$/d' caso/miniloja/pedidos.py
                 um deles do teste antigo test_handlers)
 ```
 
-Mutação: `MINILOJA_TEST_CMD="python -B testes/test_miniloja.py --existentes --codigo caso -x"` com `testes/mutacao_manual.py`.
+Mutação (Git Bash, na raiz):
+
+```
+MINILOJA_TEST_CMD="python -B testes/test_miniloja.py --existentes --codigo caso -x" python -B testes/mutacao_manual.py
+```
