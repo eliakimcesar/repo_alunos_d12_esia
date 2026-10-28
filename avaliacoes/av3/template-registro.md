@@ -19,14 +19,14 @@
 
 | Medição do meu time | Meu desenho |
 | --- | --- |
-| Pergunta e decisão | ___ |
-| Métrica primária e guardrail | ___ |
-| Baseline, período e método | ___ |
-| Risco de manipulação e contramedida | ___ |
-| Tarefa recorrente a automatizar e verificação exigida | ___ |
+| Pergunta e decisão | A IA reduz o tempo de correção de pequenos bugs sem aumentar o retrabalho, em ambiente controlado? Decisão: liberar o agente, em ambiente de teste, para propor correções de bugs pequenos apontados pela suíte de regressão |
+| Métrica primária e guardrail | Métrica: tempo até pronto e verificado (suíte verde), por bug. Guardrail: suíte verde, nenhum teste alterado sem justificativa e zero reabertura em 4 semanas |
+| Baseline, período e método | Baseline (AV1.6): validação de CPF sem IA ~180 min (escrita do zero, tempo lembrado); com IA 9'45" (chat) e 3'55" (agente), T1 da AV1.1, cronometrado em 25/10/2026. É âncora, não ganho: a diferença vem mais do tipo de tarefa (escrever vs. corrigir) que da IA. Método: 4 semanas no time, alternando tarefas comparáveis com e sem IA, sem repetir a mesma tarefa nos dois modos; comparar medianas. Confundidores: tarefas diferentes, tempo lembrado, oráculo e momento de aprendizado diferentes, uma pessoa |
+| Risco de manipulação e contramedida | Risco: marcar "pronto" antes de verificar; quebrar um bug em várias tarefas para parecerem rápidas; alterar o teste em vez do código. Contramedida: "pronto" exige a saída do teste anexada; tempo contado por bug, não por subtarefa; diff em testes exige revisão |
+| Tarefa recorrente a automatizar e verificação exigida | Propor diff para falhas simples de teste (só propõe; ~2/semana, 30–50 min cada). Verificação determinística antes de aplicar: a suíte passa com o diff numa cópia; diff só nos arquivos do bug; nenhum teste alterado; **o teste que motivou a correção falha sem o diff** (como `e039c68` → `8cc20d6` neste PR); o escore de mutação não cai. Permissões: leitura + testes em sandbox, sem commit, segredos ou PR de fork; tempo-limite de 5 min; teto de 50 mil tokens. Responsável: o dev da tarefa aprova e aplica. Interromper se >30% das propostas forem descartadas em 2 semanas; rever a medição se o guardrail piorar 2 semanas seguidas |
 
 **Limites e condição para rever:** `pedido_id = "tmp-{usuario_id}"` é compartilhado entre pedidos do mesmo usuário: `liberar` remove a entrada de `reservas` de um pedido anterior com o mesmo SKU (o saldo fica certo). SKU repetido continua sobrescrevendo `reservas`. Pagamento recusado ainda deixa reservas (R2.3 só exige "não salva"). O teste cobre um cenário (falha no 2º item), não falhas no 1º nem pedidos com três ou mais itens. A branch parte de `main`; R1.3/R1.5 estão no PR da AV2. Rever se `pedido_id` passar a ser único ou se o contrato exigir liberar reservas no pagamento recusado.
 
-**Procedência/IA:** utilizada / ferramenta e modelo visíveis: Claude Code, Claude Opus 5.5; tarefa delegada e contexto: roteiro da atividade, rascunho do escopo, teste de regressão, correção, sabotagem, mutação, descrição do PR e rascunho deste registro; trecho aproveitado: teste, correção e PR, após minha revisão do plano; minha verificação/intervenção: aprovei o escopo, escolhi o B3 e o modo, revisei o plano e decidi deixar `pedido_id` compartilhado e SKU repetido como limites, conferi as saídas e escrevi a medição. O raciocínio e a decisão registrados são meus.
+**Procedência/IA:** utilizada / ferramenta e modelo visíveis: Claude Code, Claude Opus 5.5; tarefa delegada e contexto: roteiro da atividade, rascunho do escopo, teste de regressão, correção, sabotagem, mutação, descrição do PR e rascunho deste registro; trecho aproveitado: teste, correção e PR, após minha revisão do plano; minha verificação/intervenção: aprovei o escopo, escolhi o B3 e o modo, revisei o plano e decidi deixar `pedido_id` compartilhado e SKU repetido como limites, conferi as saídas; a medição vem do meu registro AV1.6 (baseline, tarefa de automação e números escolhidos por mim), com a verificação do teste vermelho e da mutação acrescentada a partir deste PR. O raciocínio e a decisão registrados são meus.
 
-**Revisão:** [x] modo; [x] escopo; [x] verificação; [x] erros da IA; [ ] medição e automação; [ ] procedência.
+**Revisão:** [x] modo; [x] escopo; [x] verificação; [x] erros da IA; [x] medição e automação; [ ] procedência.
