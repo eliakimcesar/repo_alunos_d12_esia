@@ -19,7 +19,7 @@ Aprovado na sessão com o agente às 18:07:53, antes do primeiro commit (`e039c6
 3. Registro e esta descrição (`7dd40c5`).
 4. Após revisão do registro: teste com várias reservas, teste do 409 no handler e rótulos regra/derivado nas asserções (`ea70c8a`).
 
-Decisão de revisão: a quantidade devolvida vem da lista local, não de `estoque.reservas`, porque `reservar` sobrescreve a chave `(pedido_id, sku)`. Os problemas do `pedido_id` compartilhado e do SKU duplicado em `reservas` ficaram fora do escopo (ver Limites).
+Decisão de revisão: a quantidade devolvida vem da lista local, não de `estoque.reservas`, porque `reservar` sobrescreve a chave `(pedido_id, sku)`. Os problemas do `pedido_id` compartilhado e do SKU duplicado em `reservas` ficaram fora do escopo (ver Limites). O `pedido_id` foi decidido antes da correção (18:17:21); o SKU repetido era um gatilho de "pare e pergunte", e o agente aplicou a recomendação sem esperar minha resposta, que veio às 18:21:53, depois do `8cc20d6`. A decisão não mudou, mas o escopo não foi cumprido nesse ponto.
 
 ## Como verificar
 ```
