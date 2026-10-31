@@ -1,0 +1,28 @@
+# Caracterização AV1.4 — antes de qualquer mudança
+# 2026-10-31 16:43 | Python 3.14.0 | commit legado 1a49643 | cópia de caso/legado, banco novo, sem rede
+
+$ CIENTO_OFFLINE=1 python -B -m cienciometria.jobs ingest
+120 trabalhos
+[exit=0]
+
+$ CIENTO_OFFLINE=1 python -B -m cienciometria.jobs enriquecer
+30 autores
+[exit=0]
+
+$ CIENTO_OFFLINE=1 python -B -m cienciometria.jobs relatorio top_instituicoes
+Universidade Federal de Teste                   64
+Universidade Exemplo do Recife                  64
+Universidade de Exemplolândia                   58
+Centro de Pesquisa Imaginário                   46
+Instituto Fictício de Tecnologia                10
+[exit=0]
+
+$ CIENTO_OFFLINE=1 python -B -m cienciometria.jobs relatorio evolucao_anual
+0  trabalhos=  2  citacoes=   21
+2018  trabalhos= 22  citacoes= 1797
+2019  trabalhos= 18  citacoes= 1781
+2020  trabalhos= 21  citacoes= 2003
+2021  trabalhos= 18  citacoes= 1465
+2022  trabalhos= 18  citacoes= 1374
+2023  trabalhos= 21  citacoes= 2400
+[exit=0]
