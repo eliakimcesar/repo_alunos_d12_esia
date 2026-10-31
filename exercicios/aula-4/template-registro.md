@@ -27,11 +27,11 @@ conceito_principal: Aprend. de Máquina 31 | Eng. de Software 28 | Ciência da C
 | --- | --- | --- | --- |
 | 0a | `CIENTO_AMBIENT`→`CIENTO_AMBIENTE` no cron | Humana: ativa prod = pasta `/mnt/compartilhado/parceiro`, 500 páginas e cache agressivo | `config.ambiente()`=`prod` no cron; os 3 efeitos aceitos pelo mantenedor |
 | 0b | `refresh` antes de `corrigir_anos` e de `exporta_parceiro` | Humana | Pipeline completo: `exportado`=120 e 0 obras com `ano<1900` |
-| 1 | `mailto` → `api_key` na URL e fora do User-Agent; nenhuma das duas entra no hash do cache (`cliente.py:16,21,35`) | Humana (segredo) + script que re-chaveia o cache atual | Saídas offline idênticas à base acima |
+| 1 | `mailto` → `api_key` na URL e fora do User-Agent; nenhuma das duas entra no hash do cache (`cliente.py:16,21,35`) | Humana (segredo) + script que re-chaveia o cache atual | Saídas offline iguais à base acima, salvo a ordem dos empatados (64/64) |
 | 2a | Nomes `concepts.id`→`topics.id`, `/concepts`→`/topics` | Codemod (só nomes; URL muda, exige cache novo) | grep sem nomes antigos; teste novo de `montar_url` |
 | 2b | Valor `C9000001` (`config.ini:9`) sem `T…` 1:1; `conceitos.salvar` lê `level`/`ancestors` (`conceitos.py:8-12`); `last_known_institutions` é lista, pode vir vazia | Humana (topic(s), esquema, regra para vazio/múltiplas) | Obras ingeridas × 120; nenhum `IndexError` com lista vazia |
 | 3 | `concepts[0]`→`primary_topic`; nível da "área" (domain/field/subfield/topic) | Humana | `conceito_principal` × base acima; diferenças (esperadas) registradas e aceitas |
-| 4 | `x_concepts` (será removido) → `group_by=topics.id`; CSV do parceiro com colunas e ordem fixas (`exporta_parceiro.py:7`) | Humana (acordo com parceiro) | `areas_autores` × base; CSV byte a byte igual |
+| 4 | `x_concepts` (será removido) → `group_by=topics.id`; CSV do parceiro com colunas e ordem fixas (`exporta_parceiro.py:7`) | Humana (acordo com parceiro) | `areas_autores` × base; CSV igual ao gravado, salvo a ordem dos empatados (`ORDER BY 2 DESC` sem desempate, `exporta_parceiro.py:20`) |
 
 **Limite da leitura e condição para reabrir:** não cobre o crontab e as variáveis reais do servidor, outros escritores do SQLite, o parceiro que lê o CSV, nem respostas reais de `/topics` (só a doc). Chamadas por `getattr` escapam de grep. Reabro uma resposta se surgir outro agendamento ou variável, outro escritor ou uma resposta da API diferente da doc. Fontes: [deprecações do OpenAlex](https://help.openalex.org/api/deprecations.md); [chaves de API obrigatórias desde 13/02/2026](https://groups.google.com/g/openalex-users/c/rI1GIAySpVQ).
 
